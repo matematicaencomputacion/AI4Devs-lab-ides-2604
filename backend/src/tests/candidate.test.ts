@@ -70,6 +70,8 @@ describe('POST /candidates', () => {
 
     const second = await request(app).post('/candidates').send(payload);
     expect(second.statusCode).toBe(409);
+    expect(Array.isArray(second.body.errors)).toBe(true);
+    expect(second.body.errors.length).toBeGreaterThan(0);
     expect(second.body.errors[0].field).toBe('email');
   });
 });
