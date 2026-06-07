@@ -5,6 +5,7 @@ import prisma from '../lib/prisma';
 const testEmails = [
   'happy.path@example.com',
   'duplicate@example.com',
+  'required.only@example.com',
 ];
 
 const cleanup = async () => {
@@ -39,6 +40,26 @@ describe('POST /candidates', () => {
       email: 'happy.path@example.com',
       phone: '+54 11 1234 5678',
       address: 'Calle Falsa 123',
+    });
+    expect(response.body.id).toEqual(expect.any(Number));
+  });
+
+  it('crea un candidato con solo los campos requeridos y responde 201', async () => {
+    const response = await request(app)
+      .post('/candidates')
+      .send({
+        firstName: 'Alan',
+        lastName: 'Turing',
+        email: 'required.only@example.com',
+      });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toMatchObject({
+      firstName: 'Alan',
+      lastName: 'Turing',
+      email: 'required.only@example.com',
+      phone: null,
+      address: null,
     });
     expect(response.body.id).toEqual(expect.any(Number));
   });
