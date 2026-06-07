@@ -31,11 +31,12 @@ interface FieldConfig {
   label: string;
   type?: string;
   required?: boolean;
+  half?: boolean;
 }
 
 const fields: FieldConfig[] = [
-  { name: 'firstName', label: 'Nombre', required: true },
-  { name: 'lastName', label: 'Apellido', required: true },
+  { name: 'firstName', label: 'Nombre', required: true, half: true },
+  { name: 'lastName', label: 'Apellido', required: true, half: true },
   { name: 'email', label: 'Email', type: 'email', required: true },
   { name: 'phone', label: 'Teléfono' },
   { name: 'address', label: 'Dirección' },
@@ -104,59 +105,82 @@ const AddCandidateForm: React.FC = () => {
   };
 
   return (
-    <div className="candidate-form-wrapper">
-      <h1 className="candidate-form-title">Añadir candidato</h1>
-      <p className="candidate-form-subtitle">
-        Completá los datos del candidato. Los campos marcados con * son
-        obligatorios.
-      </p>
+    <section className="candidate-page">
+      <div className="candidate-card">
+        <header className="candidate-card__head">
+          <span className="candidate-kicker">Reclutamiento</span>
+          <h1 className="candidate-title">Añadir candidato</h1>
+          <p className="candidate-subtitle">
+            Completá los datos del candidato. Los campos marcados con
+            <span className="candidate-subtitle__req"> *</span> son obligatorios.
+          </p>
+        </header>
 
-      {successMessage && (
-        <div className="candidate-alert success" role="status">
-          {successMessage}
-        </div>
-      )}
-      {serverError && (
-        <div className="candidate-alert error" role="alert">
-          {serverError}
-        </div>
-      )}
+        {successMessage && (
+          <div className="candidate-alert candidate-alert--success" role="status">
+            <span className="candidate-alert__dot" aria-hidden="true" />
+            {successMessage}
+          </div>
+        )}
+        {serverError && (
+          <div className="candidate-alert candidate-alert--error" role="alert">
+            <span className="candidate-alert__dot" aria-hidden="true" />
+            {serverError}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} noValidate>
-        {fields.map(({ name, label, type, required }) => {
-          const fieldError = errors[name];
-          const errorId = `${name}-error`;
-          return (
-            <div className="candidate-field" key={name}>
-              <label htmlFor={name}>
-                {label}
-                {required && <span className="required"> *</span>}
-              </label>
-              <input
-                id={name}
-                name={name}
-                type={type || 'text'}
-                value={values[name] ?? ''}
-                onChange={handleChange(name)}
-                disabled={submitting}
-                className={fieldError ? 'has-error' : undefined}
-                aria-invalid={fieldError ? true : undefined}
-                aria-describedby={fieldError ? errorId : undefined}
-              />
-              {fieldError && (
-                <span className="field-error" id={errorId}>
-                  {fieldError}
-                </span>
-              )}
-            </div>
-          );
-        })}
+        <form className="candidate-form" onSubmit={handleSubmit} noValidate>
+          <div className="candidate-grid">
+            {fields.map(({ name, label, type, required, half }, index) => {
+              const fieldError = errors[name];
+              const errorId = `${name}-error`;
+              return (
+                <div
+                  className={`candidate-field${half ? '' : ' candidate-field--full'}`}
+                  key={name}
+                  style={{ animationDelay: `${index * 60}ms` }}
+                >
+                  <label htmlFor={name} className="candidate-field__label">
+                    <span>{label}</span>
+                    {required ? (
+                      <span className="candidate-field__req" aria-hidden="true">
+                        *
+                      </span>
+                    ) : (
+                      <span className="candidate-field__opt">Opcional</span>
+                    )}
+                  </label>
+                  <input
+                    id={name}
+                    name={name}
+                    type={type || 'text'}
+                    value={values[name] ?? ''}
+                    onChange={handleChange(name)}
+                    disabled={submitting}
+                    className={`candidate-input${fieldError ? ' has-error' : ''}`}
+                    aria-invalid={fieldError ? true : undefined}
+                    aria-describedby={fieldError ? errorId : undefined}
+                  />
+                  {fieldError && (
+                    <span className="candidate-field__error" id={errorId}>
+                      {fieldError}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-        <button type="submit" className="candidate-submit" disabled={submitting}>
-          {submitting ? 'Guardando…' : 'Añadir candidato'}
-        </button>
-      </form>
-    </div>
+          <button
+            type="submit"
+            className="candidate-submit"
+            disabled={submitting}
+          >
+            {submitting ? 'Guardando…' : 'Añadir candidato'}
+          </button>
+        </form>
+      </div>
+    </section>
   );
 };
 
